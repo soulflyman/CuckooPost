@@ -1,8 +1,15 @@
 <?php
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(403);
+    exit('Invalid request');
+}
+
 require 'vendor/autoload.php'; // Ensure PHPMailer is installed via Composer
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+
 
 function getPostVariables() {
     $email = filter_input(INPUT_POST, 'mailto', FILTER_VALIDATE_EMAIL);
@@ -136,7 +143,7 @@ function sendEmail($email, $subject, $message) {
 function fetchTokenData($token) {
     try {
         $db = new SQLite3(__DIR__ . '/admin/CuckooPost.db');
-        $stmt = $db->prepare('SELECT uuid, `description`, expiration_date, `limit`, `counter` FROM tokens WHERE uuid = :token');
+        $stmt = $db->prepare('SELECT uuid, `description`, expiration_date, `limit`, `counter`, recipient_whitelist FROM tokens WHERE uuid = :token');
         $stmt->bindValue(':token', $token, SQLITE3_TEXT);
         $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
         return $result;
@@ -212,6 +219,40 @@ function validateSetup() {
     }
 }
 
+function isRecipientAllowed($recipientWhitelistString, $email) {
+    $recipientWhitelist = explode(',', $recipientWhitelistString);
+    return in_array($email, $recipientWhitelist);
+}
+
+function logMessage($tokenData, $email, $subject, $message) {
+    include __DIR__ . '/admin/base_config.php';
+    if (!$cuckooPostBaseConfig['mailLog']) {
+        return;
+    }
+    try {
+        $db = new SQLite3(__DIR__ . '/admin/CuckooPost.db');
+        $stmt = $db->prepare('INSERT INTO mail_logs (token_uuid, token_description, recipient, subject, message) VALUES (:token_uuid, :token_description, :recipient, :subject, :message)');
+        $stmt->bindValue(':token_uuid', $tokenData['uuid'], SQLITE3_TEXT);
+        $stmt->bindValue(':token_description', $tokenData['description'], SQLITE3_TEXT);
+        $stmt->bindValue(':recipient', $email, SQLITE3_TEXT);
+        $stmt->bindValue(':subject', $subject, SQLITE3_TEXT);
+        $stmt->bindValue(':message', $message, SQLITE3_TEXT);
+        $stmt->execute();
+    } catch (Exception $e) {
+        http_response_code(500);
+        $errorMessage = 'Database error after message was send successfully: ' . $e->getMessage();
+        echo $errorMessage;
+        sendDebugEmail([
+            'Error' => $errorMessage,
+            'Token' => $token,
+            'Email' => $email,
+            'Subject' => $subject,
+            'Message' => $message
+        ]);
+        exit;
+    }
+}
+
 // Main script execution
 validateSetup();
 list($email, $subject, $message) = getPostVariables();
@@ -235,12 +276,7 @@ if (!$tokenData) {
     exit;
 }
 
-if (isTokenValid($tokenData)) {
-    $mailWasSend = sendEmail($email, $subject, $message);
-    if ($mailWasSend) {
-        increaseMessageCounter($tokenData['uuid']);
-    }
-} else {
+if (!isTokenValid($tokenData)) {
     http_response_code(401);
     $errorMessage = 'Invalid token or token expired [1].';
     echo $errorMessage;
@@ -252,6 +288,28 @@ if (isTokenValid($tokenData)) {
         'Subject' => $subject,
         'Message' => $message
     ]);
+    exit;
+}
+
+if (!isRecipientAllowed($tokenData['recipient_whitelist'], $email)) {
+    http_response_code(403);
+    $errorMessage = 'Recipient not allowed.';
+    echo $errorMessage;
+    sendDebugEmail([
+        'Error' => $errorMessage,
+        'Token' => $token,
+        'TokenData' => json_encode($tokenData),
+        'Email' => $email,
+        'Subject' => $subject,
+        'Message' => $message
+    ]);
+    exit;
+}
+
+$mailWasSend = sendEmail($email, $subject, $message);
+if ($mailWasSend) {
+    increaseMessageCounter($tokenData['uuid']);
+    logMessage($tokenData, $email, $subject, $message);
 }
 
 exit;

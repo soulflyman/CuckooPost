@@ -14,6 +14,8 @@ You also have not to rely on third-party libraries because most coding languages
 - Token-based authentication for secure email sending.
 - Admin interface to manage tokens.
 - Debugging support with error emails.
+- Optional logging of all send messages (WIP)
+- Recipient whitelist
 
 ## Requirements
 
@@ -74,6 +76,8 @@ CuckooPost does use the php `mail()` function when the file `smtp_config.php` do
 CuckooPost always does use the `mail()` function when sending error emails to you.
 
 ## Usage
+
+In some server configurations you have to add `index.php` to the url or when using `curl` just add the option `-L`
 
 ### Sending Emails
 

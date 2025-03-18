@@ -2,5 +2,6 @@
 $cuckooPostBaseConfig = [
     'from' => 'your_sender_address',
     'fromName' => 'CuckooPost',
+    'mailLog' => false,
 ];
 ?>
