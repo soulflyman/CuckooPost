@@ -220,6 +220,9 @@ function validateSetup() {
 }
 
 function isRecipientAllowed($recipientWhitelistString, $email) {
+    if(!$recipientWhitelistString) {
+        return true;
+    }
     $recipientWhitelist = explode(',', $recipientWhitelistString);
     return in_array($email, $recipientWhitelist);
 }
