@@ -1,0 +1,8 @@
+<?php
+$smtpConfig = [
+    'host' => 'smtp.example.com',
+    'username' => 'your_username',
+    'password' => 'your_password',
+    'port' => 587
+];
+?>

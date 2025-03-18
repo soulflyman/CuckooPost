@@ -1,0 +1,38 @@
+# Composer dependencies
+/vendor/
+
+# Environment variables
+.env
+
+# Log files
+*.log
+
+# Cache files
+/cache/
+
+# Backup files
+*.bak
+
+# IDE specific files
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+### Application and development specific files ###
+
+# Database file
+admin/CuckooPost.db
+
+# Configuration files
+admin/base_config.php
+admin/smtp_config.php
+
+# User specific files
+admin/.htaccess
+admin/.htpasswd
+
+# REST API tests
+admin/test.rest

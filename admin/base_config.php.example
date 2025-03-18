@@ -1,0 +1,6 @@
+<?php
+$cuckooPostBaseConfig = [
+    'from' => 'your_sender_address',
+    'fromName' => 'CuckooPost',
+];
+?>
