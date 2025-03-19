@@ -103,6 +103,8 @@ curl -X POST "https://example.com/CuckooPost" \
 
 Access the admin interface to manage tokens at `https://example.com/admin/`.
 
+**CuckooPost does not provide any access protection for the admin panel. So it is highly recommended that you restrict access to the admin folder based on your server setup like using an .htaccess on Apache or limit the access only from specific IPs in your firewall.**
+
 ## Screenshots
 
 ![Admin Overview](screenshots/admin-overview.png "Admin panel overview screenshot")
