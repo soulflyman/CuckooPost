@@ -14,44 +14,49 @@ You also have not to rely on third-party libraries because most coding languages
 - Token-based authentication for secure email sending.
 - Admin interface to manage tokens.
 - Debugging support with error emails.
-- Optional logging of all send messages (WIP)
-- Recipient whitelist
+- Optional logging of all send messages.
+- Recipient whitelist.
 
 ## Requirements
 
-- PHP 7.4 or higher
+- PHP 8.3 or higher
 - Composer for dependency management
 - SQLite3 extension enabled
 
 ## Installation
 
 1. Clone the repository:
+
     ```sh
     git clone https://github.com/soulflyman/CuckooPost.git
     cd CuckooPost
     ```
 
 2. Install dependencies using Composer:
+
     ```sh
     composer install
     ```
 
-4. Copy the example base configuration file and adjust it to your needs:
+3. Copy the example base configuration file and adjust it to your needs:
+
     ```sh
     cp admin/base_config.php.example admin/base_config.php
     ```
 
-5. You absolutely should passwordprotect the admin folder.
+4. You absolutely should passwordprotect the admin folder.
 
 ## Configuration
 
 ### Base Configuration
 
 Edit `admin/base_config.php` to set the sender email address and name:
+
 ```php
 $cuckooPostBaseConfig = [
     'from' => 'your_sender_address',
     'fromName' => 'CuckooPost',
+    'mailLog' => false,
 ];
 ```
 
@@ -60,6 +65,7 @@ The `from` address should be a valid and existing mailbox or forwarder to on, be
 ### SMTP Configuration
 
 Edit `admin/smtp_config.php` to set your SMTP server details:
+
 ```php
 $smtpConfig = [
     'host' => 'smtp.example.com',
@@ -83,7 +89,8 @@ In some server configurations you have to add `index.php` to the url or when usi
 
 To send an email, make a POST request to the endpoint with the required parameters and an authorization token.
 
-#### Example using cURL:
+#### Example using cURL
+
 ```sh
 curl -X POST "https://example.com/CuckooPost" \
     -H "Authorization: Bearer YOUR_TOKEN" \
@@ -96,6 +103,10 @@ curl -X POST "https://example.com/CuckooPost" \
 
 Access the admin interface to manage tokens at `https://example.com/admin/`.
 
+## Screenshots
+
+![Admin Overview](screenshots/admin-overview.png "Admin panel overview screenshot")
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -103,4 +114,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Development
 
 The software was a quick and dirty solution that solved an acute problem I had and is by far not the prettiest under the hood. For my purpose, this application is nearly feature complete. If there are critical issues and I have some spare time, then I will fix them. However, pull requests are welcome.
-
