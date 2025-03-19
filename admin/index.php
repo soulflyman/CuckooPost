@@ -151,12 +151,6 @@ if ($isBaseConfigValid) {
                         <span class="helper">Comma separated list of allowed email recipient addresses. Leaf empty for no filtering.</span>
                         <i>alternate_email</i>
                     </div>
-                    <div class="field label border small round">
-                        <input type="number" id="limit" name="limit" required>
-                        <label>Limit</label>
-                        <i>numbers</i>
-                        <span class="helper">Setting this value to '0' will allow an unlimited number of mails to be send.</span>
-                    </div>
                 </div>
                 <button type="submit" class="button primary slow-ripple"><i>add</i>Generate Token</button>
             </form>
