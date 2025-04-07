@@ -129,10 +129,12 @@ if ($isBaseConfigValid) {
                 <summary>
                     <article class="round border no-elevate slow-ripple">
                     <nav>
-                        <i>expand_more</i>
+                        <i>add</i>
                         <div class="max bold">Add Token</div>
                     </nav>
-
+                    </article>
+                </summary>
+                <article class="round border">
                     <?php
                         $formState = ($isBaseConfigValid) ? "": "inert";
                     ?>
