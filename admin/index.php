@@ -135,18 +135,18 @@ if ($isBaseConfigValid) {
                         <label>Description</label>
                     </div>
                     <div class="field border label small round">
-                        <input type="date" id="expiration_date" name="expiration_date" required>
+                        <input type="date" id="expiration_date" name="expiration_date" required value="<?php echo date('Y-m-d', strtotime('+7 days')); ?>">
                         <label>Expiration date</label>
                         <span class="helper">Entering 2024-02-13 will restrict Access at 2024-02-13 00:00:01</span>
                     </div>
                     <div class="field label border small round">
-                        <input type="number" id="limit" name="limit" required>
+                        <input type="number" id="limit" name="limit">
                         <label>Limit</label>
                         <i>numbers</i>
                         <span class="helper">Setting this value to '0' will allow an unlimited number of mails to be send.</span>
                     </div>
                     <div class="field border label small round">
-                        <input type="text" id="recipein-whitelist" name="recipein-whitelist" required>
+                        <input type="text" id="recipein-whitelist" name="recipein-whitelist">
                         <label>Recipient whitelist</label>
                         <span class="helper">Comma separated list of allowed email recipient addresses. Leaf empty for no filtering.</span>
                         <i>alternate_email</i>
