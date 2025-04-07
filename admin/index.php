@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $description = $_POST['description'];
     $expiration_date = $_POST['expiration_date'];
-    $limit = $_POST['limit'];
+    $limit = !empty($_POST['limit']) ? $_POST['limit'] : '0';
 
     $recipientWhitelistRaw = $_POST['recipein-whitelist'];
     $recipientWhitelist = explode(',', $recipientWhitelistRaw);
