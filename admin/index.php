@@ -157,7 +157,7 @@ if ($isBaseConfigValid) {
                             </div>
                             <div class="field border label small round">
                                 <input type="text" id="recipein-whitelist" name="recipein-whitelist"
-                                       pattern="^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(,\s*[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})*$"
+                                       pattern="^([a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(,\s*[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})*$"
                                        title="Enter comma-separated email addresses (e.g., user@example.com, another@example.com)"
                                        oninvalid="this.setCustomValidity('Please enter valid comma-separated email addresses')"
                                        oninput="this.setCustomValidity('')">
