@@ -125,11 +125,14 @@ if ($isBaseConfigValid) {
                 </article>
             <?php endif; ?>
 
-            <hr class="large">
-
-            <h3>Manage Tokens <i>add</i></h3>
-
             <details>
+                <summary>
+                    <article class="round border no-elevate slow-ripple">
+                    <nav>
+                        <i>expand_more</i>
+                        <div class="max bold">Add Token</div>
+                    </nav>
+                    </article>
                 <?php
                     $formState = ($isBaseConfigValid) ? "": "inert";
                 ?>
@@ -160,6 +163,10 @@ if ($isBaseConfigValid) {
                     <button type="submit" class="button primary slow-ripple"><i>add</i>Generate Token</button>
                 </form>
             </details>
+
+            <hr class="large">
+
+            <h3>Existing Tokens </h3>
 
             <table class="table stripes medium-space">
                 <thead>
