@@ -156,10 +156,13 @@ if ($isBaseConfigValid) {
                                 <span class="helper">Setting this value to '0' will allow an unlimited number of mails to be send.</span>
                             </div>
                             <div class="field border label small round">
-                                <input type="text" id="recipein-whitelist" name="recipein-whitelist" pattern="^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(,\s*[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})*$"
-                                title="Enter comma-separated email addresses (e.g., user@example.com, another@example.com)">
+                                <input type="text" id="recipein-whitelist" name="recipein-whitelist"
+                                       pattern="^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(,\s*[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})*$"
+                                       title="Enter comma-separated email addresses (e.g., user@example.com, another@example.com)"
+                                       oninvalid="this.setCustomValidity('Please enter valid comma-separated email addresses')"
+                                       oninput="this.setCustomValidity('')">
                                 <label>Recipient whitelist</label>
-                                <span class="helper">Comma separated list of allowed email recipient addresses. Leaf empty for no filtering.</span>
+                                <span class="helper">Comma separated list of allowed email recipient addresses. Leave empty for no filtering.</span>
                                 <i>alternate_email</i>
                             </div>
                         </div>
