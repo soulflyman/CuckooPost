@@ -124,145 +124,43 @@ if ($isBaseConfigValid) {
                     Mails send by PHP's <code>mail()</code> funtion are send by sendmail and most likely gettting tagged as spam.</p>
                 </article>
             <?php endif; ?>
-            <h3>Create Access Token</h3>
-            <?php
-                $formState = ($isBaseConfigValid) ? "": "inert";
-            ?>
-            <form method="post" action="" <?php echo $formState ?>>
-                <div class="form-group">
-                    <div class="field border label small round">
-                        <input type="text" id="description" name="description" required>
-                        <label>Description</label>
-                    </div>
-                    <div class="field border label small round">
-                        <input type="date" id="expiration_date" name="expiration_date" required value="<?php echo date('Y-m-d', strtotime('+7 days')); ?>">
-                        <label>Expiration date</label>
-                        <span class="helper">Entering 2024-02-13 will restrict Access at 2024-02-13 00:00:01</span>
-                    </div>
-                    <div class="field label border small round">
-                        <input type="number" id="limit" name="limit">
-                        <label>Limit</label>
-                        <i>numbers</i>
-                        <span class="helper">Setting this value to '0' will allow an unlimited number of mails to be send.</span>
-                    </div>
-                    <div class="field border label small round">
-                        <input type="text" id="recipein-whitelist" name="recipein-whitelist">
-                        <label>Recipient whitelist</label>
-                        <span class="helper">Comma separated list of allowed email recipient addresses. Leaf empty for no filtering.</span>
-                        <i>alternate_email</i>
-                    </div>
-                </div>
-                <button type="submit" class="button primary slow-ripple"><i>add</i>Generate Token</button>
-            </form>
 
             <hr class="large">
+
+            <h3>Manage Tokens <i>add</i></h3>
 
             <details>
-                <summary>
-                    <article class="round border no-elevate slow-ripple">
-                    <nav>
-                        <i>expand_more</i>
-                        <div class="max bold">Help</div>
-
-                    </nav>
-                    </article>
-                </summary>
-                <article class="round border">
-                    <h4>Config</h4>
-                    <h5>Base Config</h5>
-                    <p><bold>It is important</bold> that you adjust the <code>base_config.php</code> to fit your needs.
-                    The application will not work if not filled out correct.</p>
-                    <p><bold>The email address in the <code>from</code> field must be a valid email address.</bold>
-                    It is not only used as 'From:" address, it functions also as mail recipient address for error messages.</p>
-
-                    <h5>SMTP</h5>
-                    <p>Set up your mail server in <code>smtp_config.php</code> to send emails via SMTP.
-                    This is the recomended method because the fall back is the use of the php <code>mail()</code>
-                    function which will most likely use sendmail. When sending mails by sendmail they will most likely markt as spam.</p>
-
-                    <h5>Example config files</h5>
-                    For both config files there are example files in the <code>admin</code> folder. You can copy them and adjust them to your needs.
-                </article>
+                <?php
+                    $formState = ($isBaseConfigValid) ? "": "inert";
+                ?>
+                <form method="post" action="" <?php echo $formState ?>>
+                    <div class="form-group">
+                        <div class="field border label small round">
+                            <input type="text" id="description" name="description" required>
+                            <label>Description</label>
+                        </div>
+                        <div class="field border label small round">
+                            <input type="date" id="expiration_date" name="expiration_date" required value="<?php echo date('Y-m-d', strtotime('+7 days')); ?>">
+                            <label>Expiration date</label>
+                            <span class="helper">Entering 2024-02-13 will restrict Access at 2024-02-13 00:00:01</span>
+                        </div>
+                        <div class="field label border small round">
+                            <input type="number" id="limit" name="limit">
+                            <label>Limit</label>
+                            <i>numbers</i>
+                            <span class="helper">Setting this value to '0' will allow an unlimited number of mails to be send.</span>
+                        </div>
+                        <div class="field border label small round">
+                            <input type="text" id="recipein-whitelist" name="recipein-whitelist">
+                            <label>Recipient whitelist</label>
+                            <span class="helper">Comma separated list of allowed email recipient addresses. Leaf empty for no filtering.</span>
+                            <i>alternate_email</i>
+                        </div>
+                    </div>
+                    <button type="submit" class="button primary slow-ripple"><i>add</i>Generate Token</button>
+                </form>
             </details>
 
-            <hr class="large">
-
-            <details>
-                <summary>
-                    <article class="round border no-elevate slow-ripple">
-                    <nav>
-                        <i>expand_more</i>
-                        <div class="max bold">Usage</div>
-                    </nav>
-                    </article>
-                </summary>
-                <article class="round border">
-                    <h5>PowerShell</h5>
-                    <pre>
-                        <code>
-Invoke-RestMethod -Uri "https://example.com/CuckooPost" `
-  -Method Post `
-  -Headers @{ "Authorization" = "Bearer YOUR_TOKEN" } `
-  -Body @{
-    mailto = "someone@example.com"
-    subject = "Hello"
-    message = "Test message"
-  } `
-  -ContentType "application/x-www-form-urlencoded"</code>
-                    </pre>
-                </article>
-                <article class="round border">
-                    <h5>cURL</h5>
-                    <pre>
-                        <code>
-curl -X POST "https://example.com/CuckooPost" \
-    -H "Authorization: Bearer YOUR_TOKEN" \
-    -d "mailto=someone@example.com" \
-    -d "subject=Hello" \
-    -d "message=Test%20message"
-                        </code>
-                    </pre>
-                </article>
-                <article class="round border">
-                    <h5>Python</h5>
-                    <pre>
-                        <code>
-import requests
-
-url = "https://example.com/CuckooPost"
-headers = {
-    "Authorization": "Bearer YOUR_TOKEN",
-    "Content-Type": "application/x-www-form-urlencoded"
-}
-data = {
-    "mailto": "someone@example.com",
-    "subject": "Hello",
-    "message": "Test message"
-}
-
-response = requests.post(url, headers=headers, data=data)
-if response.ok:
-    print("Success:", response.text)
-else:
-    print("Error:", response.status_code, response.text)</code>
-                    </pre>
-                </article>
-                <article class="round border">
-                    <h5>REST</h5>
-                    <pre>
-                        <code>
-POST https://example.com/CuckooPost  HTTP/1.1
-Authorization: Bearer YOUR_TOKEN
-Content-Type: application/x-www-form-urlencoded
-
-mailto=someone@example.com&subject=Hello&message=Test%20message</code>
-                    </pre>
-                </article>
-            </details>
-
-            <hr class="large">
-
-            <h3>Manage Tokens</h3>
             <table class="table stripes medium-space">
                 <thead>
                     <tr>
@@ -353,6 +251,114 @@ mailto=someone@example.com&subject=Hello&message=Test%20message</code>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+
+            <hr class="large">
+
+            <details>
+                <summary>
+                    <article class="round border no-elevate slow-ripple">
+                    <nav>
+                        <i>expand_more</i>
+                        <div class="max bold">Help</div>
+
+                    </nav>
+                    </article>
+                </summary>
+                <article class="round border">
+                    <h4>Config</h4>
+                    <h5>Base Config</h5>
+                    <p><bold>It is important</bold> that you adjust the <code>base_config.php</code> to fit your needs.
+                    The application will not work if not filled out correct.</p>
+                    <p><bold>The email address in the <code>from</code> field must be a valid email address.</bold>
+                    It is not only used as 'From:" address, it functions also as mail recipient address for error messages.</p>
+
+                    <h5>SMTP</h5>
+                    <p>Set up your mail server in <code>smtp_config.php</code> to send emails via SMTP.
+                    This is the recomended method because the fall back is the use of the php <code>mail()</code>
+                    function which will most likely use sendmail. When sending mails by sendmail they will most likely markt as spam.</p>
+
+                    <h5>Example config files</h5>
+                    For both config files there are example files in the <code>admin</code> folder. You can copy them and adjust them to your needs.
+                </article>
+            </details>
+
+            <hr class="large">
+
+            <details>
+                <summary>
+                    <article class="round border no-elevate slow-ripple">
+                    <nav>
+                        <i>expand_more</i>
+                        <div class="max bold">Usage</div>
+                    </nav>
+                    </article>
+                </summary>
+                <article class="round border">
+                    <h5>PowerShell</h5>
+                    <pre>
+                        <code>
+Invoke-RestMethod -Uri "https://example.com/CuckooPost" `
+-Method Post `
+-Headers @{ "Authorization" = "Bearer YOUR_TOKEN" } `
+-Body @{
+mailto = "someone@example.com"
+subject = "Hello"
+message = "Test message"
+} `
+-ContentType "application/x-www-form-urlencoded"</code>
+                    </pre>
+                </article>
+                <article class="round border">
+                    <h5>cURL</h5>
+                    <pre>
+                        <code>
+curl -X POST "https://example.com/CuckooPost" \
+-H "Authorization: Bearer YOUR_TOKEN" \
+-d "mailto=someone@example.com" \
+-d "subject=Hello" \
+-d "message=Test%20message"
+                        </code>
+                    </pre>
+                </article>
+                <article class="round border">
+                    <h5>Python</h5>
+                    <pre>
+                        <code>
+import requests
+
+url = "https://example.com/CuckooPost"
+headers = {
+"Authorization": "Bearer YOUR_TOKEN",
+"Content-Type": "application/x-www-form-urlencoded"
+}
+data = {
+"mailto": "someone@example.com",
+"subject": "Hello",
+"message": "Test message"
+}
+
+response = requests.post(url, headers=headers, data=data)
+if response.ok:
+print("Success:", response.text)
+else:
+print("Error:", response.status_code, response.text)</code>
+                    </pre>
+                </article>
+                <article class="round border">
+                    <h5>REST</h5>
+                    <pre>
+                        <code>
+POST https://example.com/CuckooPost  HTTP/1.1
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/x-www-form-urlencoded
+
+mailto=someone@example.com&subject=Hello&message=Test%20message</code>
+                    </pre>
+                </article>
+            </details>
+
+            <hr class="large">
+
             <footer class="fixed center-align">
                 <a href="https://github.com/soulflyman/CuckooPost" target="_blank">
                     <i class="extra">
