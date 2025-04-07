@@ -133,35 +133,38 @@ if ($isBaseConfigValid) {
                         <div class="max bold">Add Token</div>
                     </nav>
                     </article>
-                <?php
-                    $formState = ($isBaseConfigValid) ? "": "inert";
-                ?>
-                <form method="post" action="" <?php echo $formState ?>>
-                    <div class="form-group">
-                        <div class="field border label small round">
-                            <input type="text" id="description" name="description" required>
-                            <label>Description</label>
+                </summary>
+                <article class="round border">
+                    <?php
+                        $formState = ($isBaseConfigValid) ? "": "inert";
+                    ?>
+                    <form method="post" action="" <?php echo $formState ?>>
+                        <div class="form-group">
+                            <div class="field border label small round">
+                                <input type="text" id="description" name="description" required>
+                                <label>Description</label>
+                            </div>
+                            <div class="field border label small round">
+                                <input type="date" id="expiration_date" name="expiration_date" required value="<?php echo date('Y-m-d', strtotime('+7 days')); ?>">
+                                <label>Expiration date</label>
+                                <span class="helper">Entering 2024-02-13 will restrict Access at 2024-02-13 00:00:01</span>
+                            </div>
+                            <div class="field label border small round">
+                                <input type="number" id="limit" name="limit">
+                                <label>Limit</label>
+                                <i>numbers</i>
+                                <span class="helper">Setting this value to '0' will allow an unlimited number of mails to be send.</span>
+                            </div>
+                            <div class="field border label small round">
+                                <input type="text" id="recipein-whitelist" name="recipein-whitelist">
+                                <label>Recipient whitelist</label>
+                                <span class="helper">Comma separated list of allowed email recipient addresses. Leaf empty for no filtering.</span>
+                                <i>alternate_email</i>
+                            </div>
                         </div>
-                        <div class="field border label small round">
-                            <input type="date" id="expiration_date" name="expiration_date" required value="<?php echo date('Y-m-d', strtotime('+7 days')); ?>">
-                            <label>Expiration date</label>
-                            <span class="helper">Entering 2024-02-13 will restrict Access at 2024-02-13 00:00:01</span>
-                        </div>
-                        <div class="field label border small round">
-                            <input type="number" id="limit" name="limit">
-                            <label>Limit</label>
-                            <i>numbers</i>
-                            <span class="helper">Setting this value to '0' will allow an unlimited number of mails to be send.</span>
-                        </div>
-                        <div class="field border label small round">
-                            <input type="text" id="recipein-whitelist" name="recipein-whitelist">
-                            <label>Recipient whitelist</label>
-                            <span class="helper">Comma separated list of allowed email recipient addresses. Leaf empty for no filtering.</span>
-                            <i>alternate_email</i>
-                        </div>
-                    </div>
-                    <button type="submit" class="button primary slow-ripple"><i>add</i>Generate Token</button>
-                </form>
+                        <button type="submit" class="button primary slow-ripple"><i>add</i>Generate Token</button>
+                    </form>
+                </article>
             </details>
 
             <hr class="large">
