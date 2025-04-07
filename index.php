@@ -224,7 +224,26 @@ function isRecipientAllowed($recipientWhitelistString, $email) {
         return true;
     }
     $recipientWhitelist = explode(',', $recipientWhitelistString);
-    return in_array($email, $recipientWhitelist);
+
+    // Direct match check
+    if (in_array($email, $recipientWhitelist)) {
+        return true;
+    }
+
+    // Check for plus addressing
+    if (strpos($email, '+') !== false) {
+        // Extract the base email (part before the +)
+        list($emailUsername, $emailDomain) = explode('@', $email);
+        list($baseUsername) = explode('+', $emailUsername);
+        $baseEmail = $baseUsername . '@' . $emailDomain;
+
+        // Check if the base email is in the whitelist
+        if (in_array($baseEmail, $recipientWhitelist)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function logMessage($tokenData, $email, $subject, $message) {
