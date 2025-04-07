@@ -132,9 +132,7 @@ if ($isBaseConfigValid) {
                         <i>expand_more</i>
                         <div class="max bold">Add Token</div>
                     </nav>
-                    </article>
-                </summary>
-                <article class="round border">
+
                     <?php
                         $formState = ($isBaseConfigValid) ? "": "inert";
                     ?>
@@ -291,8 +289,6 @@ if ($isBaseConfigValid) {
                     For both config files there are example files in the <code>admin</code> folder. You can copy them and adjust them to your needs.
                 </article>
             </details>
-
-            <hr class="large">
 
             <details>
                 <summary>
