@@ -175,7 +175,7 @@ if ($isBaseConfigValid) {
 
             <h3>Existing Tokens </h3>
 
-            <table class="table stripes medium-space">
+            <table class="table stripes tiny-space">
                 <thead>
                     <tr>
                         <th>Description</th>
@@ -295,6 +295,8 @@ if ($isBaseConfigValid) {
                     For both config files there are example files in the <code>admin</code> folder. You can copy them and adjust them to your needs.
                 </article>
             </details>
+
+            <hr class="large">
 
             <details>
                 <summary>
