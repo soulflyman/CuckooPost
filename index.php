@@ -26,8 +26,8 @@ function getAuthorizationToken() {
         return $matches[1];
     } else {
         http_response_code(400);
-        echo 'Invalid or missing Authorization header.';
-        echo 'Headers received: ';
+        echo 'Invalid or missing Authorization header.\n';
+        echo 'Headers received: \n\n';
         echo json_encode($headers);
         exit;
     }
