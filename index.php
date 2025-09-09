@@ -20,17 +20,50 @@ function getPostVariables() {
 }
 
 function getAuthorizationToken() {
+    // Try to get token from Authorization header first
     $headers = apache_request_headers();
     $authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : null;
     if ($authHeader && preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
         return $matches[1];
-    } else {
-        http_response_code(400);
-        echo 'Invalid or missing Authorization header.\n';
-        echo 'Headers received: \n\n';
-        echo json_encode($headers);
-        exit;
     }
+
+    // Fallback: Check for token in POST data
+    if (isset($_POST['token'])) {
+        return $_POST['token'];
+    }
+
+    // Fallback: Check for token in GET parameters
+    if (isset($_GET['token'])) {
+        return $_GET['token'];
+    }
+
+    // Fallback: Check for HTTP_AUTHORIZATION header (some servers use this)
+    if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+        $httpAuth = $_SERVER['HTTP_AUTHORIZATION'];
+        if (preg_match('/Bearer\s(\S+)/', $httpAuth, $matches)) {
+            return $matches[1];
+        }
+    }
+
+    // Fallback: Check for REDIRECT_HTTP_AUTHORIZATION (for some server configurations)
+    if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+        $redirectAuth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        if (preg_match('/Bearer\s(\S+)/', $redirectAuth, $matches)) {
+            return $matches[1];
+        }
+    }
+
+    http_response_code(400);
+    echo 'Invalid or missing Authorization token.\n';
+    echo 'Please provide the token via Authorization header, POST parameter "token", or GET parameter "token".\n';
+    echo 'Headers received: \n\n';
+    echo json_encode($headers, JSON_PRETTY_PRINT);
+    echo '\n\nServer variables (AUTH related): \n\n';
+    $authVars = array_filter($_SERVER, function($key) {
+        return stripos($key, 'auth') !== false || stripos($key, 'http_') === 0;
+    }, ARRAY_FILTER_USE_KEY);
+    echo json_encode($authVars, JSON_PRETTY_PRINT);
+    exit;
 }
 
 function sendDebugEmail($messageContent) {
@@ -155,10 +188,7 @@ function fetchTokenData($token) {
         echo $errorMessage;
         sendDebugEmail([
             'Error' => $errorMessage,
-            'Token' => $token,
-            'Email' => $email,
-            'Subject' => $subject,
-            'Message' => $message
+            'Token' => $token
         ]);
         exit;
     }
@@ -176,10 +206,7 @@ function increaseMessageCounter($token) {
         echo $errorMessage;
         sendDebugEmail([
             'Error' => $errorMessage,
-            'Token' => $token,
-            'Email' => $email,
-            'Subject' => $subject,
-            'Message' => $message
+            'Token' => $token
         ]);
         exit;
     }
