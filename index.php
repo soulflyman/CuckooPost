@@ -27,6 +27,8 @@ function getAuthorizationToken() {
     } else {
         http_response_code(400);
         echo 'Invalid or missing Authorization header.';
+        echo 'Headers received: ';
+        echo json_encode($headers);
         exit;
     }
 }
@@ -186,6 +188,11 @@ function increaseMessageCounter($token) {
 function validateSetup() {
     $errorOccurred = false;
     $errorMessages = [];
+    if(!is_dir(__DIR__ . '/vendor')) {
+        $errorOccurred = true;
+        $errorMessages[] = "Vendor folder missing, please execute 'composer install' in the document root of this site.";
+    }
+
     if (!file_exists(__DIR__ . '/admin/CuckooPost.db')) {
         $errorOccurred = true;
         $errorMessages[] = 'Database file not found.';
