@@ -104,6 +104,7 @@ function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig) {
     $smtpUsername = $smtpConfig['username'];
     $smtpPassword = $smtpConfig['password'];
     $smtpPort = $smtpConfig['port'];
+    $smtpAuthType = isset($smtpConfig['auth_type']) ? $smtpConfig['auth_type'] : ''; // CRAM-MD5, LOGIN, PLAIN, XOAUTH2
 
     $mail = new PHPMailer(true);
 
@@ -116,6 +117,8 @@ function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig) {
         $mail->Password = $smtpPassword;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $smtpPort;
+
+        $mail->AuthType = 'XOAUTH2';
 
         // Recipients
         $mail->setFrom($from, $fromName);

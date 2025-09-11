@@ -4,5 +4,6 @@ $smtpConfig = [
     'username' => 'your_username',
     'password' => 'your_password',
     'port' => 587
+    // 'auth_type' => '', //CRAM-MD5, LOGIN, PLAIN, XOAUTH2
 ];
 ?>
