@@ -3,7 +3,7 @@ $smtpConfig = [
     'host' => 'smtp.example.com',
     'username' => 'your_username',
     'password' => 'your_password',
-    'port' => 587
-    // 'auth_type' => '', //CRAM-MD5, LOGIN, PLAIN, XOAUTH2
+    'port' => 587,
+    'auth_type' => '', // can be: <empty>, CRAM-MD5, LOGIN, PLAIN, XOAUTH2
 ];
 ?>
