@@ -117,8 +117,7 @@ function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig) {
         $mail->Password = $smtpPassword;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $smtpPort;
-
-        $mail->AuthType = 'XOAUTH2';
+        $mail->AuthType = $smtpAuthType;
 
         // Recipients
         $mail->setFrom($from, $fromName);
