@@ -91,6 +91,11 @@ if ($isBaseConfigValid) {
         $isBaseConfigValid = false;
     }
 }
+
+$version = 'unknown';
+if (file_exists(__DIR__ . '/../VERSION')) {
+    $version = trim(file_get_contents(__DIR__ . '/../VERSION'));
+}
 ?>
 
 <!DOCTYPE html>
@@ -456,6 +461,7 @@ Content-Type: text/plain
                         </svg>
                     </i>
                 </a>
+                <span><?php echo htmlspecialchars($version); ?></span>
             </footer>
         </div>
     </main>
