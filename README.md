@@ -99,6 +99,22 @@ curl -X POST "https://example.com/CuckooPost" \
     -d "message=Test%20message"
 ```
 
+### Sending Emails with Attachments
+
+To send attachments, use `multipart/form-data`. You can upload multiple files by adding them as form fields.
+
+#### Example using cURL
+
+```sh
+curl -X POST "https://example.com/CuckooPost" \
+    -H "Authorization: Bearer YOUR_TOKEN" \
+    -F "mailto=someone@example.com" \
+    -F "subject=Hello" \
+    -F "message=See attached files" \
+    -F "file1=@/path/to/document.pdf" \
+    -F "file2=@/path/to/image.png"
+```
+
 ### Admin Interface
 
 Access the admin interface to manage tokens at `https://example.com/admin/`.

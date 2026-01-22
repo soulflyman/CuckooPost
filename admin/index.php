@@ -321,6 +321,22 @@ message = "Test message"
 } `
 -ContentType "application/x-www-form-urlencoded"</code>
                     </pre>
+                    <div class="divider"></div>
+                    <h5>With Attachments</h5>
+                    <pre>
+                        <code>
+$form = @{
+mailto = "someone@example.com"
+subject = "Hello"
+message = "Test message"
+file1 = Get-Item "C:\path\to\file.pdf"
+}
+
+Invoke-RestMethod -Uri "https://example.com/CuckooPost" `
+-Method Post `
+-Headers @{ "Authorization" = "Bearer YOUR_TOKEN" } `
+-Form $form</code>
+                    </pre>
                 </article>
                 <article class="round border">
                     <h5>cURL</h5>
@@ -331,6 +347,18 @@ curl -X POST "https://example.com/CuckooPost" \
 -d "mailto=someone@example.com" \
 -d "subject=Hello" \
 -d "message=Test%20message"
+                        </code>
+                    </pre>
+                    <div class="divider"></div>
+                    <h5>With Attachments</h5>
+                    <pre>
+                        <code>
+curl -X POST "https://example.com/CuckooPost" \
+-H "Authorization: Bearer YOUR_TOKEN" \
+-F "mailto=someone@example.com" \
+-F "subject=Hello" \
+-F "message=Test message" \
+-F "file1=@/path/to/file.pdf"
                         </code>
                     </pre>
                 </article>
@@ -357,6 +385,24 @@ print("Success:", response.text)
 else:
 print("Error:", response.status_code, response.text)</code>
                     </pre>
+                    <div class="divider"></div>
+                    <h5>With Attachments</h5>
+                    <pre>
+                        <code>
+import requests
+
+url = "https://example.com/CuckooPost"
+headers = {"Authorization": "Bearer YOUR_TOKEN"}
+data = {
+"mailto": "someone@example.com",
+"subject": "Hello",
+"message": "Test message"
+}
+files = {'file': open('report.pdf', 'rb')}
+
+response = requests.post(url, headers=headers, data=data, files=files)
+                        </code>
+                    </pre>
                 </article>
                 <article class="round border">
                     <h5>REST</h5>
@@ -367,6 +413,34 @@ Authorization: Bearer YOUR_TOKEN
 Content-Type: application/x-www-form-urlencoded
 
 mailto=someone@example.com&subject=Hello&message=Test%20message</code>
+                    </pre>
+                    <div class="divider"></div>
+                    <h5>With Attachments</h5>
+                    <pre>
+                        <code>
+POST https://example.com/CuckooPost HTTP/1.1
+Authorization: Bearer YOUR_TOKEN
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="mailto"
+
+someone@example.com
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="subject"
+
+Hello
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="message"
+
+Test message
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file1"; filename="test.txt"
+Content-Type: text/plain
+
+(file content)
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+                        </code>
                     </pre>
                 </article>
             </details>

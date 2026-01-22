@@ -16,7 +16,8 @@ function getPostVariables() {
     $subject = $_POST['subject'];
     $message = $_POST['message'];
     $message = preg_replace('/\\\\n/', "\n", $message);
-    return [$email, $subject, $message];
+
+    return [$email, $subject, $message, $_FILES];
 }
 
 function getAuthorizationToken() {
@@ -77,6 +78,37 @@ function sendDebugEmail($messageContent) {
     exit;
 }
 
+function validateAttachments($attachments) {
+    if (empty($attachments)) {
+        return;
+    }
+
+    include __DIR__ . '/admin/base_config.php';
+
+    $maxAttachments = isset($cuckooPostBaseConfig['maxAttachments']) ? $cuckooPostBaseConfig['maxAttachments'] : 3;
+    $maxAttachmentSizeMB = isset($cuckooPostBaseConfig['maxAttachmentSizeMB']) ? $cuckooPostBaseConfig['maxAttachmentSizeMB'] : 10;
+    $maxAttachmentSizeBytes = $maxAttachmentSizeMB * 1024 * 1024;
+
+    if (count($attachments) > $maxAttachments) {
+        http_response_code(400);
+        exit("Too many attachments. Max allowed: $maxAttachments");
+    }
+
+    $totalSize = 0;
+    foreach ($attachments as $file) {
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+             http_response_code(400);
+             exit("Error uploading file: " . $file['name'] . " (Code: " . $file['error'] . ")");
+        }
+        $totalSize += $file['size'];
+    }
+
+    if ($totalSize > $maxAttachmentSizeBytes) {
+         http_response_code(400);
+         exit("Total attachment size exceeds limit of {$maxAttachmentSizeMB}MB");
+    }
+}
+
 function validateInputs($token, $email, $subject, $message) {
     if (!$token || !$email || !$subject || !$message) {
         http_response_code(400);
@@ -97,7 +129,7 @@ function isTokenValid($tokenData) {
     return $tokenData && strtotime($tokenData['expiration_date'] . ' 00:00:01') > time() && ($tokenData['limit'] == 0 || $tokenData['counter'] < $tokenData['limit']);
 }
 
-function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig) {
+function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig, $attachments = []) {
     $smtpHost = $smtpConfig['host'];
     $from = $baseConfig['from'];
     $fromName = $baseConfig['fromName'];
@@ -128,6 +160,12 @@ function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig) {
         $mail->Subject = $subject;
         $mail->Body    = $message;
 
+        foreach ($attachments as $file) {
+            if (isset($file['tmp_name']) && is_uploaded_file($file['tmp_name'])) {
+                $mail->addAttachment($file['tmp_name'], $file['name']);
+            }
+        }
+
         $mail->send();
         echo 'Email sent successfully.';
         return true;
@@ -138,33 +176,42 @@ function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig) {
     }
 }
 
-function sendEmail($email, $subject, $message) {
+function sendEmail($email, $subject, $message, $attachments = []) {
     include __DIR__ . '/admin/base_config.php';
     $smtpConfigFile = __DIR__ . '/admin/smtp_config.php';
 
     if (file_exists($smtpConfigFile)) {
         include $smtpConfigFile;
-        return sendEmailBySMTP($email, $subject, $message, $cuckooPostBaseConfig, $cuckooPostSmtpConfig);
+        return sendEmailBySMTP($email, $subject, $message, $cuckooPostBaseConfig, $cuckooPostSmtpConfig, $attachments);
     }
 
-    // Fallback to PHP mail() function
+    // Fallback to PHP mail() function (using PHPMailer)
     include __DIR__ . '/admin/base_config.php';
     $fromName = !empty($cuckooPostBaseConfig['fromName']) ? $cuckooPostBaseConfig['fromName'] : $cuckooPostBaseConfig['from'];
-    $fromName = '=?UTF-8?B?' . base64_encode($fromName) . '?=';
     $from = $cuckooPostBaseConfig['from'];
-    $subject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
-    //$message = wordwrap($message, 70, "\r\n");
+    
+    $mail = new PHPMailer(true);
 
-    $headers = 'From: '.$fromName.' <'.$cuckooPostBaseConfig['from'].'>' . "\r\n" .
-                'X-Mailer: PHP/' . phpversion() . "\r\n" .
-                'Content-Type: text/plain; charset=UTF-8';
-    if (mail($email, $subject, $message, $headers)) {
+    try {
+        $mail->setFrom($from, $fromName);
+        $mail->addAddress($email);
+        $mail->isHTML(false);
+        $mail->Subject = $subject;
+        $mail->Body    = $message;
+
+        foreach ($attachments as $file) {
+            if (isset($file['tmp_name']) && is_uploaded_file($file['tmp_name'])) {
+                $mail->addAttachment($file['tmp_name'], $file['name']);
+            }
+        }
+
+        $mail->send();
         echo 'Email sent successfully.';
         return true;
-    } else {
+    } catch (Exception $e) {
         http_response_code(500);
         $errorMessag = "Failed to send email.";
-        $detailedErrorMessage = error_get_last()['message'];
+        $detailedErrorMessage = $mail->ErrorInfo;
         echo $errorMessag;
         sendDebugEmail([
             'Error' => $errorMessag,
@@ -313,9 +360,10 @@ function logMessage($tokenData, $email, $subject, $message) {
 
 // Main script execution
 validateSetup();
-list($email, $subject, $message) = getPostVariables();
+list($email, $subject, $message, $attachments) = getPostVariables();
 $token = getAuthorizationToken();
 validateInputs($token, $email, $subject, $message);
+validateAttachments($attachments);
 
 $message = strip_tags($message);
 
@@ -364,7 +412,7 @@ if (!isRecipientAllowed($tokenData['recipient_whitelist'], $email)) {
     exit;
 }
 
-$mailWasSend = sendEmail($email, $subject, $message);
+$mailWasSend = sendEmail($email, $subject, $message, $attachments);
 if ($mailWasSend) {
     increaseMessageCounter($tokenData['uuid']);
     logMessage($tokenData, $email, $subject, $message);
