@@ -338,6 +338,10 @@ if (file_exists(__DIR__ . '/../VERSION')) {
 
                     <h5>Example config files</h5>
                     For both config files there are example files in the <code>admin</code> folder. You can copy them and adjust them to your needs.
+
+                    <h5>Authentication Fallback</h5>
+                    <p>Some hosting providers (like Strato) are known to drop the <code>Authorization: Bearer</code> header before it reaches PHP.
+                    If you encounter authentication errors despite providing a valid token in the header, you can use the fallback method by passing the token as a POST or GET parameter: <code>token=YOUR_TOKEN</code>.</p>
                 </article>
             </details>
 
