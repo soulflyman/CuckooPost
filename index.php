@@ -129,10 +129,10 @@ function isTokenValid($tokenData) {
     return $tokenData && strtotime($tokenData['expiration_date'] . ' 00:00:01') > time() && ($tokenData['limit'] == 0 || $tokenData['counter'] < $tokenData['limit']);
 }
 
-function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig, $attachments = []) {
+function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig, $attachments = [], $tokenData = []) {
     $smtpHost = $smtpConfig['host'];
     $from = $baseConfig['from'];
-    $fromName = $baseConfig['fromName'];
+    $fromName = !empty($tokenData['sender_name']) ? $tokenData['sender_name'] : $baseConfig['fromName'];
     $smtpUsername = $smtpConfig['username'];
     $smtpPassword = $smtpConfig['password'];
     $smtpPort = $smtpConfig['port'];
@@ -176,18 +176,18 @@ function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig, $
     }
 }
 
-function sendEmail($email, $subject, $message, $attachments = []) {
+function sendEmail($email, $subject, $message, $attachments = [], $tokenData = []) {
     include __DIR__ . '/admin/base_config.php';
     $smtpConfigFile = __DIR__ . '/admin/smtp_config.php';
 
     if (file_exists($smtpConfigFile)) {
         include $smtpConfigFile;
-        return sendEmailBySMTP($email, $subject, $message, $cuckooPostBaseConfig, $cuckooPostSmtpConfig, $attachments);
+        return sendEmailBySMTP($email, $subject, $message, $cuckooPostBaseConfig, $cuckooPostSmtpConfig, $attachments, $tokenData);
     }
 
     // Fallback to PHP mail() function (using PHPMailer)
     include __DIR__ . '/admin/base_config.php';
-    $fromName = !empty($cuckooPostBaseConfig['fromName']) ? $cuckooPostBaseConfig['fromName'] : $cuckooPostBaseConfig['from'];
+    $fromName = !empty($tokenData['sender_name']) ? $tokenData['sender_name'] : (!empty($cuckooPostBaseConfig['fromName']) ? $cuckooPostBaseConfig['fromName'] : $cuckooPostBaseConfig['from']);
     $from = $cuckooPostBaseConfig['from'];
     
     $mail = new PHPMailer(true);
@@ -227,7 +227,7 @@ function sendEmail($email, $subject, $message, $attachments = []) {
 function fetchTokenData($token) {
     try {
         $db = new SQLite3(__DIR__ . '/admin/CuckooPost.db');
-        $stmt = $db->prepare('SELECT uuid, `description`, expiration_date, `limit`, `counter`, recipient_whitelist FROM tokens WHERE uuid = :token');
+        $stmt = $db->prepare('SELECT uuid, `description`, sender_name, expiration_date, `limit`, `counter`, recipient_whitelist FROM tokens WHERE uuid = :token');
         $stmt->bindValue(':token', $token, SQLITE3_TEXT);
         $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
         return $result;
@@ -422,7 +422,7 @@ if (!isRecipientAllowed($tokenData['recipient_whitelist'], $email)) {
     exit;
 }
 
-$mailWasSend = sendEmail($email, $subject, $message, $attachments);
+$mailWasSend = sendEmail($email, $subject, $message, $attachments, $tokenData);
 if ($mailWasSend) {
     increaseMessageCounter($tokenData['uuid']);
     logMessage($tokenData, $email, $subject, $message, $attachments);

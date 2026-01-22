@@ -1,6 +1,6 @@
 <?php
 $db = new SQLite3('CuckooPost.db');
-$db->exec('CREATE TABLE IF NOT EXISTS tokens (uuid TEXT PRIMARY KEY, `description` TEXT, expiration_date TEXT, `limit` NUMBER DEFAULT 0, `counter` NUMBER DEFAULT 0, recipient_whitelist TEXT)');
+$db->exec('CREATE TABLE IF NOT EXISTS tokens (uuid TEXT PRIMARY KEY, `description` TEXT, sender_name TEXT, expiration_date TEXT, `limit` NUMBER DEFAULT 0, `counter` NUMBER DEFAULT 0, recipient_whitelist TEXT)');
 $db->exec("CREATE TABLE IF NOT EXISTS mail_logs (token_uuid TEXT, token_description TEXT, recipient TEXT, subject TEXT, message TEXT, attachments TEXT, sent_at TEXT DEFAULT (datetime('now')), FOREIGN KEY(token_uuid) REFERENCES tokens(uuid))");
 
 // Migration: Add attachments column if it doesn't exist
@@ -14,6 +14,19 @@ while ($column = $columns->fetchArray(SQLITE3_ASSOC)) {
 }
 if (!$hasAttachmentsColumn) {
     $db->exec("ALTER TABLE mail_logs ADD COLUMN attachments TEXT");
+}
+
+// Migration: Add sender_name column to tokens if it doesn't exist
+$columnsTokens = $db->query("PRAGMA table_info(tokens)");
+$hasSenderNameColumn = false;
+while ($column = $columnsTokens->fetchArray(SQLITE3_ASSOC)) {
+    if ($column['name'] === 'sender_name') {
+        $hasSenderNameColumn = true;
+        break;
+    }
+}
+if (!$hasSenderNameColumn) {
+    $db->exec("ALTER TABLE tokens ADD COLUMN sender_name TEXT");
 }
 
 // Check if UUID already exists
@@ -48,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $uuid = generateUUID();
 
     $description = $_POST['description'];
+    $sender_name = !empty($_POST['sender_name']) ? $_POST['sender_name'] : null;
     $expiration_date = $_POST['expiration_date'];
     $limit = !empty($_POST['limit']) ? $_POST['limit'] : '0';
 
@@ -64,13 +78,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $newRecipientWhitelist = implode(',', $tempRecipientWhitelist);
 
-    $stmt = $db->prepare('INSERT INTO tokens (uuid, `description`, expiration_date, `limit`, recipient_whitelist) VALUES (:uuid, :description, :expiration_date, :limit, :recipient_whitelist)');
+    $stmt = $db->prepare('INSERT INTO tokens (uuid, `description`, sender_name, expiration_date, `limit`, recipient_whitelist) VALUES (:uuid, :description, :sender_name, :expiration_date, :limit, :recipient_whitelist)');
     $stmt->bindValue(':uuid', $uuid, SQLITE3_TEXT);
     $stmt->bindValue(':description', $description, SQLITE3_TEXT);
+    $stmt->bindValue(':sender_name', $sender_name, SQLITE3_TEXT);
     $stmt->bindValue(':expiration_date', $expiration_date, SQLITE3_TEXT);
     $stmt->bindValue(':limit', $limit, SQLITE3_TEXT);
     $stmt->bindValue(':recipient_whitelist', $newRecipientWhitelist, SQLITE3_TEXT);
     $stmt->execute();
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
 }
 
 // Handle token deletion
@@ -79,10 +96,12 @@ if (isset($_GET['delete'])) {
     $stmt = $db->prepare('DELETE FROM tokens WHERE uuid = :uuid');
     $stmt->bindValue(':uuid', $uuid, SQLITE3_TEXT);
     $stmt->execute();
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
 }
 
 // Fetch all tokens
-$result = $db->query('SELECT t.uuid, t.`description`, t.expiration_date, t.`limit`, t.`counter`, t.recipient_whitelist,
+$result = $db->query('SELECT t.uuid, t.`description`, t.sender_name, t.expiration_date, t.`limit`, t.`counter`, t.recipient_whitelist,
                       CASE WHEN EXISTS (SELECT 1 FROM mail_logs ml WHERE ml.token_uuid = t.uuid) THEN 1 ELSE 0 END AS has_logs
                       FROM tokens t');
 $tokens = [];
@@ -163,6 +182,11 @@ if (file_exists(__DIR__ . '/../VERSION')) {
                                 <label>Description</label>
                             </div>
                             <div class="field border label small round">
+                                <input type="text" id="sender_name" name="sender_name">
+                                <label>Sender Name (Optional)</label>
+                                <span class="helper">Overrides the default sender name for this token.</span>
+                            </div>
+                            <div class="field border label small round">
                                 <input type="date" id="expiration_date" name="expiration_date" required value="<?php echo date('Y-m-d', strtotime('+7 days')); ?>">
                                 <label>Expiration date</label>
                                 <span class="helper">Entering 2024-02-13 will restrict Access at 2024-02-13 00:00:01</span>
@@ -197,6 +221,7 @@ if (file_exists(__DIR__ . '/../VERSION')) {
                 <thead>
                     <tr>
                         <th>Description</th>
+                        <th>Sender Name</th>
                         <th>Limit</th>
                         <th>Expiration Date</th>
                         <th>Token</th>
@@ -210,6 +235,8 @@ if (file_exists(__DIR__ . '/../VERSION')) {
                     <tr>
                         <!----------- Description ------------------->
                         <td><?php echo htmlspecialchars($token['description']); ?></td>
+                        <!----------- Sender Name ------------------->
+                        <td><?php echo htmlspecialchars($token['sender_name'] ?? '-'); ?></td>
                         <!----------- Limit ------------------------->
                         <td class="<?php echo ((int)$token['limit'] !== 0 && (int)$token['counter'] >= (int)$token['limit']) ? 'error-text' : ''; ?>">
                             <?php
