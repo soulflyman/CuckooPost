@@ -1,7 +1,20 @@
 <?php
 $db = new SQLite3('CuckooPost.db');
 $db->exec('CREATE TABLE IF NOT EXISTS tokens (uuid TEXT PRIMARY KEY, `description` TEXT, expiration_date TEXT, `limit` NUMBER DEFAULT 0, `counter` NUMBER DEFAULT 0, recipient_whitelist TEXT)');
-$db->exec("CREATE TABLE IF NOT EXISTS mail_logs (token_uuid TEXT, token_description TEXT, recipient TEXT, subject TEXT, message TEXT, sent_at TEXT DEFAULT (datetime('now')), FOREIGN KEY(token_uuid) REFERENCES tokens(uuid))");
+$db->exec("CREATE TABLE IF NOT EXISTS mail_logs (token_uuid TEXT, token_description TEXT, recipient TEXT, subject TEXT, message TEXT, attachments TEXT, sent_at TEXT DEFAULT (datetime('now')), FOREIGN KEY(token_uuid) REFERENCES tokens(uuid))");
+
+// Migration: Add attachments column if it doesn't exist
+$columns = $db->query("PRAGMA table_info(mail_logs)");
+$hasAttachmentsColumn = false;
+while ($column = $columns->fetchArray(SQLITE3_ASSOC)) {
+    if ($column['name'] === 'attachments') {
+        $hasAttachmentsColumn = true;
+        break;
+    }
+}
+if (!$hasAttachmentsColumn) {
+    $db->exec("ALTER TABLE mail_logs ADD COLUMN attachments TEXT");
+}
 
 // Check if UUID already exists
 function doesUUIDAlreadyExist($uuid) {
@@ -484,6 +497,7 @@ Content-Type: text/plain
                         { title: "Recipient", field: "recipient" },
                         { title: "Subject", field: "subject" },
                         { title: "Message", field: "message" },
+                        { title: "Attachments", field: "attachments" },
                         { title: "Sent At", field: "sent_at" }
                     ]
                 });

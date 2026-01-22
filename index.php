@@ -329,19 +329,29 @@ function isRecipientAllowed($recipientWhitelistString, $email) {
     return false;
 }
 
-function logMessage($tokenData, $email, $subject, $message) {
+function logMessage($tokenData, $email, $subject, $message, $attachments = []) {
     include __DIR__ . '/admin/base_config.php';
     if (!$cuckooPostBaseConfig['mailLog']) {
         return;
     }
+
+    $attachmentNames = [];
+    foreach ($attachments as $file) {
+        if (isset($file['name'])) {
+            $attachmentNames[] = $file['name'];
+        }
+    }
+    $attachmentsString = implode(', ', $attachmentNames);
+
     try {
         $db = new SQLite3(__DIR__ . '/admin/CuckooPost.db');
-        $stmt = $db->prepare('INSERT INTO mail_logs (token_uuid, token_description, recipient, subject, message) VALUES (:token_uuid, :token_description, :recipient, :subject, :message)');
+        $stmt = $db->prepare('INSERT INTO mail_logs (token_uuid, token_description, recipient, subject, message, attachments) VALUES (:token_uuid, :token_description, :recipient, :subject, :message, :attachments)');
         $stmt->bindValue(':token_uuid', $tokenData['uuid'], SQLITE3_TEXT);
         $stmt->bindValue(':token_description', $tokenData['description'], SQLITE3_TEXT);
         $stmt->bindValue(':recipient', $email, SQLITE3_TEXT);
         $stmt->bindValue(':subject', $subject, SQLITE3_TEXT);
         $stmt->bindValue(':message', $message, SQLITE3_TEXT);
+        $stmt->bindValue(':attachments', $attachmentsString, SQLITE3_TEXT);
         $stmt->execute();
     } catch (Exception $e) {
         http_response_code(500);
@@ -415,7 +425,7 @@ if (!isRecipientAllowed($tokenData['recipient_whitelist'], $email)) {
 $mailWasSend = sendEmail($email, $subject, $message, $attachments);
 if ($mailWasSend) {
     increaseMessageCounter($tokenData['uuid']);
-    logMessage($tokenData, $email, $subject, $message);
+    logMessage($tokenData, $email, $subject, $message, $attachments);
 }
 
 exit;

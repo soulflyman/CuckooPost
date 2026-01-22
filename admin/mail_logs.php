@@ -8,7 +8,7 @@ $token_uuid = $_GET['token_uuid'];
 
 try {
     $db = new SQLite3(__DIR__ . '/CuckooPost.db');
-    $stmt = $db->prepare('SELECT sent_at, recipient, subject, message FROM mail_logs WHERE token_uuid = :token_uuid');
+    $stmt = $db->prepare('SELECT sent_at, recipient, subject, message, attachments FROM mail_logs WHERE token_uuid = :token_uuid');
     $stmt->bindValue(':token_uuid', $token_uuid, SQLITE3_TEXT);
     $result = $stmt->execute();
 
