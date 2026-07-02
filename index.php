@@ -74,7 +74,12 @@ function sendDebugEmail($messageContent) {
     foreach ($messageContent as $key => $value) {
         $debugMessage .= "$key:\t$value\r\n";
     }
-    mail($to, "CuckooPost ERROR", $debugMessage);
+    $headers = [
+        'MIME-Version' => '1.0',
+        'Content-Type' => 'text/plain; charset=UTF-8',
+        'From' => $to
+    ];
+    mail($to, "CuckooPost ERROR", $debugMessage, $headers);
     exit;
 }
 
@@ -156,6 +161,7 @@ function sendEmailBySMTP($email, $subject, $message, $baseConfig, $smtpConfig, $
         $mail->addAddress($email);
 
         // Content
+        $mail->CharSet = 'UTF-8';
         $mail->isHTML(false);
         $mail->Subject = $subject;
         $mail->Body    = $message;
@@ -195,6 +201,7 @@ function sendEmail($email, $subject, $message, $attachments = [], $tokenData = [
     try {
         $mail->setFrom($from, $fromName);
         $mail->addAddress($email);
+        $mail->CharSet = 'UTF-8';
         $mail->isHTML(false);
         $mail->Subject = $subject;
         $mail->Body    = $message;
